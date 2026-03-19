@@ -1,0 +1,50 @@
+{
+  "name": "@coinpaprika/mcp",
+  "version": "1.0.0",
+  "description": "A Model Context Protocol server for CoinPaprika cryptocurrency market data — prices, tickers, exchanges, and more",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "coinpaprika-mcp": "./dist/bin.js"
+  },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "mkdir -p dist && cp -r src/* dist/ && chmod +x dist/bin.js",
+    "prepublishOnly": "npm run build",
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "coinpaprika",
+    "cryptocurrency",
+    "crypto",
+    "bitcoin",
+    "market-data",
+    "prices",
+    "tickers",
+    "exchanges",
+    "ohlcv",
+    "blockchain"
+  ],
+  "author": "CoinPaprika",
+  "license": "MIT",
+  "homepage": "https://github.com/coinpaprika/coinpaprika-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/coinpaprika/coinpaprika-mcp"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.4.1",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.24.2"
+  }
+}
