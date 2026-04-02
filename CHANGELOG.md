@@ -2,6 +2,20 @@
 
 All notable changes to the CoinPaprika MCP Server will be documented in this file.
 
+## [1.1.0] - 2026-04-02
+
+### Added
+- Dockerfile for containerized deployment
+- Smoke test suite (`npm test`) verifying server initialization, tool listing, and live API calls
+- Test script for CI/CD integration
+
+### Changed
+- Bumped version to 1.1.0
+- Updated HOSTED-MCP-SPEC.md to reflect hosted/self-hosted tool parity
+
+### Fixed
+- Hosted MCP server at mcp.coinpaprika.com now exposes `getCapabilities` tool (was missing, only available in self-hosted). Both versions now have 30 identical tools.
+
 ## [1.0.0] - 2026-03-19
 
 ### Added
