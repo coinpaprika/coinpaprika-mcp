@@ -3,14 +3,19 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import fetch from 'node-fetch';
 import { z } from 'zod';
 
-// Base URL for CoinPaprika API
-const API_BASE_URL = 'https://api.coinpaprika.com/v1';
-
 // Server version
 const SERVER_VERSION = '1.0.0';
 
 // Optional API key from environment
 const API_KEY = process.env.COINPAPRIKA_API_KEY || '';
+
+// Base URL for CoinPaprika API.
+// Free tier uses api.coinpaprika.com; paid plans use api-pro.coinpaprika.com.
+// Same key, different host. Hitting the free host with a paid key still
+// returns data but applies free-tier limits and omits paid-tier fields.
+const API_FREE_URL = 'https://api.coinpaprika.com/v1';
+const API_PRO_URL = 'https://api-pro.coinpaprika.com/v1';
+const API_BASE_URL = API_KEY ? API_PRO_URL : API_FREE_URL;
 
 // Error code constants
 const ErrorCodes = {
@@ -157,7 +162,9 @@ const RATE_LIMIT = 10000;
 function buildHeaders() {
   const headers = { 'content-type': 'application/json' };
   if (API_KEY) {
-    headers['Authorization'] = `Bearer ${API_KEY}`;
+    // CoinPaprika expects the bare API key. The "Bearer" prefix triggers a
+    // Cloudflare WAF block on api-pro and returns HTTP 403.
+    headers['Authorization'] = API_KEY;
   }
   return headers;
 }

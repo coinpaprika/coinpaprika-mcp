@@ -2,6 +2,14 @@
 
 All notable changes to the CoinPaprika MCP Server will be documented in this file.
 
+## [1.1.1] - 2026-05-05
+
+### Fixed
+- **Authorization header format** — now sends `Authorization: <key>` (bare) instead of `Authorization: Bearer <key>`. The `Bearer` prefix was rejected by the api-pro Cloudflare WAF with HTTP 403, which silently broke every authenticated request from this MCP server.
+- **Base URL routing** — when `COINPAPRIKA_API_KEY` is set, requests now route through `https://api-pro.coinpaprika.com/v1` instead of the free base. Six paid-tier tools (`getCoinOHLCVHistorical`, `getTickersHistoricalById`, `getHistoricalTickerByContract`, `getMappings`, `getChangelogIDs`, `keyInfo`) were unreachable in 1.1.0 because the free base rejected them with HTTP 402.
+
+Combined, these two bugs meant that `@coinpaprika/mcp@1.1.0` could not authenticate against the paid API at all. Upgrading to `1.1.1` is required for any user with a `COINPAPRIKA_API_KEY` set.
+
 ## [1.1.0] - 2026-04-02
 
 ### Added
