@@ -32,6 +32,20 @@ const ErrorCodes = {
 // Coin ID validation regex
 const COIN_ID_REGEX = /^[a-z0-9]+-[a-z0-9-]+$/;
 
+// Canonical-slug guidance shared by every tool that takes a coin id. Agents
+// kept passing ticker symbols ("BTC") or guessing slugs, then retry-looping on
+// "resource not found" (devrel#5). The slug is NOT derivable from the symbol,
+// so steer them to search / resolveId first.
+const COIN_ID_DESCRIPTION =
+  "Canonical CoinPaprika coin slug in 'symbol-name' format, e.g. 'btc-bitcoin', " +
+  "'eth-ethereum', 'aave-aave-token'. Do NOT pass ticker symbols ('BTC', 'AAVE') " +
+  "or guess the slug — it is not derivable from the symbol. Call search or " +
+  "resolveId first to resolve a symbol or name to its canonical id.";
+
+// Known misspellings, surfaced in getCapabilities so MCP catalogs / tool
+// routers / agent frameworks can match fuzzy references back to us (devrel#6).
+const SERVER_ALIASES = ["coinparika", "coinpapika", "coinaprika", "coin-paprika", "coin paprika"];
+
 // Structured error response builder
 function buildErrorResponse(code, message, retryable, suggestion, correctedExample, metadata) {
   const error = {
@@ -260,6 +274,7 @@ async function withGuidance(exec, hint) {
 function buildCapabilitiesDocument() {
   return {
     service: "coinpaprika",
+    aliases: SERVER_ALIASES,
     version: SERVER_VERSION,
     description: "Cryptocurrency market data for 8000+ coins",
     server: {
@@ -801,7 +816,7 @@ server.tool(
   'getCoinOHLCVLatest',
   'OHLCV last full day',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     quote: z.string().optional().default('usd').describe("Quote currency (default: usd)")
   },
   async ({ coinId, quote = 'usd' }) => {
@@ -819,7 +834,7 @@ server.tool(
   'getCoinOHLCVToday',
   'OHLCV today',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     quote: z.string().optional().default('usd').describe("Quote currency (default: usd)")
   },
   async ({ coinId, quote = 'usd' }) => {
@@ -837,7 +852,7 @@ server.tool(
   'getCoinOHLCVHistorical',
   'OHLCV historical (plan-dependent)',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     start: z.string().describe("Start date (ISO 8601 or yyyy-mm-dd)"),
     end: z.string().optional().describe("End date (ISO 8601 or yyyy-mm-dd)"),
     limit: z.number().optional().default(50).describe("Number of data points (default: 50, max: 250)"),
@@ -858,7 +873,7 @@ server.tool(
 server.tool(
   'getCoinById',
   'Coin details (descriptive info)',
-  { coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)") },
+  { coinId: z.string().describe(COIN_ID_DESCRIPTION) },
   async ({ coinId }) => {
     try {
       const response = await fetchFromAPI(`/coins/${encodeURIComponent(coinId)}`);
@@ -874,7 +889,7 @@ server.tool(
   'getCoinEvents',
   'Events for a coin',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     limit: z.number().optional().default(50).describe("Number of events to return (default: 50, max: 250)")
   },
   async ({ coinId, limit = 50 }) => {
@@ -895,7 +910,7 @@ server.tool(
   'getCoinExchanges',
   'Exchanges for a coin',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     limit: z.number().optional().default(50).describe("Number of exchanges to return (default: 50, max: 250)")
   },
   async ({ coinId, limit = 50 }) => {
@@ -916,7 +931,7 @@ server.tool(
   'getCoinMarkets',
   'Markets for a coin',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     quotes: z.string().optional().describe("Comma-separated quote currencies"),
     limit: z.number().optional().default(50).describe("Number of markets to return (default: 50, max: 250)")
   },
@@ -939,7 +954,7 @@ server.tool(
   'getTickersById',
   'Ticker for a specific coin',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     quotes: z.string().optional().describe("Comma-separated quote currencies")
   },
   async ({ coinId, quotes }) => {
@@ -958,7 +973,7 @@ server.tool(
   'getTickersHistoricalById',
   'Historical ticks for a coin (plan dependent)',
   {
-    coinId: z.string().describe("Coin ID in format: symbol-name (e.g., btc-bitcoin)"),
+    coinId: z.string().describe(COIN_ID_DESCRIPTION),
     start: z.string().describe("Start date (ISO 8601 or yyyy-mm-dd)"),
     end: z.string().optional().describe("End date"),
     limit: z.number().optional().default(50).describe("Number of data points (default: 50, max: 250)"),
@@ -1228,8 +1243,8 @@ server.tool(
   'priceConverter',
   'Convert base -> quote',
   {
-    baseCurrencyId: z.string().describe("Base currency ID (e.g., btc-bitcoin)"),
-    quoteCurrencyId: z.string().describe("Quote currency ID (e.g., usd-us-dollars)"),
+    baseCurrencyId: z.string().describe("Required. Source CoinPaprika coin slug (e.g., 'btc-bitcoin'). Full slugs only; ticker symbols like 'BTC' are rejected upstream. Call search or resolveId first."),
+    quoteCurrencyId: z.string().describe("Required. Target CoinPaprika coin slug (e.g., 'usd-us-dollars', 'eth-ethereum'). Full slugs only; ticker symbols like 'USD' are rejected upstream."),
     amount: z.number().optional().default(0).describe("Amount to convert (default: 0)")
   },
   async ({ baseCurrencyId, quoteCurrencyId, amount = 0 }) => {
