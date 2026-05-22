@@ -38,9 +38,10 @@ const COIN_ID_REGEX = /^[a-z0-9]+-[a-z0-9-]+$/;
 // so steer them to search / resolveId first.
 const COIN_ID_DESCRIPTION =
   "Canonical CoinPaprika coin slug in 'symbol-name' format, e.g. 'btc-bitcoin', " +
-  "'eth-ethereum', 'aave-aave-token'. Do NOT pass ticker symbols ('BTC', 'AAVE') " +
-  "or guess the slug — it is not derivable from the symbol. Call search or " +
-  "resolveId first to resolve a symbol or name to its canonical id.";
+  "'eth-ethereum', 'ada-cardano'. Do NOT pass ticker symbols ('BTC', 'AAVE') " +
+  "or guess the slug — it is not derivable from the symbol (e.g. AAVE resolves " +
+  "to 'aave-new', which you could not guess). Call search or resolveId first to " +
+  "resolve a symbol or name to its canonical id.";
 
 // Known misspellings, surfaced in getCapabilities so MCP catalogs / tool
 // routers / agent frameworks can match fuzzy references back to us (devrel#6).
@@ -111,7 +112,7 @@ function parseAPIError(status, statusText, endpoint) {
       ErrorCodes.CP404_NOT_FOUND,
       'Resource not found',
       false,
-      'The requested resource does not exist. Check the ID format and try again',
+      'No resource with that id exists — it may be misspelled, retired, or for a different entity. Call search or resolveId to get the current canonical id, then retry.',
       undefined,
       { endpoint }
     );
@@ -736,6 +737,34 @@ const server = new McpServer({
   description: 'MCP server for accessing CoinPaprika cryptocurrency market data',
 });
 
+// devrel#5 parity: validate coin/currency id format BEFORE the handler runs,
+// returning the structured CP400_INVALID_COIN_ID guidance (matches the hosted
+// MCP). Wrapping server.tool centralizes this for every id-bearing tool
+// (coinId / baseCurrencyId / quoteCurrencyId) instead of repeating it in each
+// handler — so a ticker symbol like "BTC" gets actionable guidance to call
+// search/resolveId instead of a bare upstream 404.
+const _registerTool = server.tool.bind(server);
+server.tool = (...regArgs) => {
+  const handler = regArgs[regArgs.length - 1];
+  const schema = regArgs.length >= 4 && regArgs[2] && typeof regArgs[2] === 'object' ? regArgs[2] : null;
+  if (typeof handler === 'function' && schema) {
+    const idFields = ['coinId', 'baseCurrencyId', 'quoteCurrencyId'].filter((f) => f in schema);
+    if (idFields.length > 0) {
+      regArgs[regArgs.length - 1] = async (args, ...rest) => {
+        for (const f of idFields) {
+          const v = args && args[f];
+          if (typeof v === 'string') {
+            const err = validateCoinId(v);
+            if (err) return formatMcpError(err);
+          }
+        }
+        return handler(args, ...rest);
+      };
+    }
+  }
+  return _registerTool(...regArgs);
+};
+
 // ─── Tool 1: status ───
 server.tool(
   'status',
@@ -1295,7 +1324,10 @@ server.tool(
   },
   async (params) => {
     const qs = new URLSearchParams();
-    for (const [k, v] of Object.entries(params)) {
+    // Allowlist the upstream-recognized mapping params only — never forward
+    // MCP-only or unexpected fields, which the upstream rejects with a 400.
+    for (const k of ['coinpaprika', 'coinmarketcap', 'coingecko', 'cryptocompare', 'isin', 'dti']) {
+      const v = params[k];
       if (v) qs.set(k, String(v));
     }
     return withGuidance(
