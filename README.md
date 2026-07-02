@@ -12,7 +12,7 @@ npm install -g @coinpaprika/mcp
 coinpaprika-mcp
 
 # Or run directly without installation
-npx @coinpaprika/mcp
+npx @coinpaprika/mcp@latest
 ```
 
 CoinPaprika MCP connects Claude to live crypto market data for 8,000+ coins. No API key required for free-tier features. [Installation](#installation) | [Configuration](#claude-desktop-integration) | [API Reference](https://api.coinpaprika.com)
@@ -59,7 +59,7 @@ Add the following to your Claude Desktop configuration file:
   "mcpServers": {
     "coinpaprika": {
       "command": "npx",
-      "args": ["@coinpaprika/mcp"]
+      "args": ["@coinpaprika/mcp@latest"]
     }
   }
 }
@@ -72,7 +72,7 @@ Add the following to your Claude Desktop configuration file:
   "mcpServers": {
     "coinpaprika": {
       "command": "npx",
-      "args": ["@coinpaprika/mcp"],
+      "args": ["@coinpaprika/mcp@latest"],
       "env": {
         "COINPAPRIKA_API_KEY": "your-api-key-here"
       }
@@ -85,10 +85,10 @@ Add the following to your Claude Desktop configuration file:
 
 ```bash
 # Add as MCP server in Claude Code
-claude mcp add coinpaprika -- npx @coinpaprika/mcp
+claude mcp add coinpaprika -- npx @coinpaprika/mcp@latest
 
 # With API key
-COINPAPRIKA_API_KEY=your-key claude mcp add coinpaprika -- npx @coinpaprika/mcp
+COINPAPRIKA_API_KEY=your-key claude mcp add coinpaprika -- npx @coinpaprika/mcp@latest
 ```
 
 ### Hosted Alternative (No Installation)
@@ -198,7 +198,7 @@ export COINPAPRIKA_API_KEY=your-api-key-here
 coinpaprika-mcp
 
 # Or pass inline
-COINPAPRIKA_API_KEY=your-api-key-here npx @coinpaprika/mcp
+COINPAPRIKA_API_KEY=your-api-key-here npx @coinpaprika/mcp@latest
 ```
 
 Get an API key at [coinpaprika.com/api/pricing](https://coinpaprika.com/api/pricing/).
