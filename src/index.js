@@ -1,10 +1,12 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createRequire } from 'module';
 import fetch from 'node-fetch';
 import { z } from 'zod';
 
-// Server version
-const SERVER_VERSION = '1.0.0';
+// Server version, read from package.json so the banner, capabilities
+// document, and status tool always report the published version.
+const SERVER_VERSION = createRequire(import.meta.url)('../package.json').version;
 
 // Optional API key from environment
 const API_KEY = process.env.COINPAPRIKA_API_KEY || '';
