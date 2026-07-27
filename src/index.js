@@ -1302,7 +1302,7 @@ server.tool(
 // ─── Tool 30: getCapabilities ───
 server.tool(
   'getCapabilities',
-  'Return server capabilities, workflow patterns, validation rules, and best-practice sequences. Use this to onboard agents quickly.',
+  "Get the server's capabilities, supported workflow patterns, validation rules and recommended tool sequences. Use FIRST to onboard as an agent, or when asked 'what can this server do', 'how should I chain these tools', 'what are the parameter rules'. This describes the MCP server itself, not crypto data.",
   {},
   async () => {
     try {
