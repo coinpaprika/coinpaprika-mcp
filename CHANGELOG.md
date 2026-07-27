@@ -2,6 +2,17 @@
 
 All notable changes to the CoinPaprika MCP Server will be documented in this file.
 
+## [1.3.0] - 2026-07-27
+
+### Changed
+
+- **Intent-first tool descriptions.** Every tool description was rewritten so agents select the right tool from the description alone, each leading with what the tool returns plus `Use when asked '...'` cues (e.g. `getTickers` vs `getCoinById` vs `getContracts`). Matches the descriptions now served by the hosted worker at `mcp.coinpaprika.com`, so hosted and self-host read identically.
+- `getCapabilities` description aligned with the hosted worker (onboarding-first wording; clarifies it describes the MCP server itself, not crypto data).
+
+### Added
+
+- `server.json` manifest for publication to the official MCP Registry (`registry.modelcontextprotocol.io`).
+
 ## [1.1.1] - 2026-05-05
 
 ### Fixed
