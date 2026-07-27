@@ -254,11 +254,11 @@ function buildCapabilitiesDocument() {
   return {
     service: "coinpaprika",
     version: SERVER_VERSION,
-    description: "Cryptocurrency market data for 8000+ coins",
+    description: "Real-time cryptocurrency prices and market data for 12,000+ coins",
     server: {
       name: "CoinPaprika MCP Server",
       version: SERVER_VERSION,
-      description: "Cryptocurrency market data — prices, tickers, exchanges, OHLCV, and more",
+      description: "Real-time cryptocurrency prices, market caps, 24h changes and volumes for 12,000+ coins (Bitcoin, Ethereum, Solana, and more) and 350+ exchanges. Use for how much a crypto is worth, top coins by market cap, or live market data.",
       documentation_url: "https://api.coinpaprika.com",
     },
     tools: [
@@ -272,7 +272,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getGlobal",
-        description: "Get global cryptocurrency market statistics",
+        description: "Get a global crypto market overview: total market cap, total 24h volume, Bitcoin dominance, and market-wide 24h change. Use for 'how is the crypto market doing', 'total market cap', 'BTC dominance'. For a single coin's price use getTickersById.",
         category: "market",
         parameters: {},
         returns: { type: "object", properties: ["market_cap_usd", "volume_24h_usd", "bitcoin_dominance_percentage"] },
@@ -280,7 +280,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoins",
-        description: "List all available coins",
+        description: "List available coins (id, name, symbol, rank). Use to discover coins or map a name to an id. Does NOT include prices; for prices use getTickers or getTickersById.",
         category: "coins",
         parameters: { limit: { type: "integer", required: false, default: 50, min: 1, max: 250 } },
         returns: { type: "array", items: "Coin" },
@@ -288,7 +288,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTickers",
-        description: "Get market data for all active cryptocurrencies",
+        description: "Get current prices, market caps and 24h changes for the top cryptocurrencies ranked by market cap. Use for 'top 5 coins', 'top crypto today', 'biggest cryptocurrencies', or a market snapshot. For one specific coin use getTickersById.",
         category: "market",
         parameters: {
           quotes: { type: "string", required: false, default: "USD", description: "Comma-separated quote currencies" },
@@ -299,7 +299,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinOHLCVLatest",
-        description: "Get OHLCV data for last full day",
+        description: "Get the latest full-day OHLC candle (open/high/low/close + volume) for a coin. For the live spot price use getTickersById.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id", example: "btc-bitcoin" },
@@ -310,7 +310,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinOHLCVToday",
-        description: "Get OHLCV data for today",
+        description: "Get today's in-progress OHLC candle for a coin. For the current spot price use getTickersById; for past candles use getCoinOHLCVHistorical.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -321,7 +321,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinOHLCVHistorical",
-        description: "Get historical OHLCV data (requires Starter+ plan)",
+        description: "Get historical OHLC candles (open/high/low/close + volume) for a coin over a date range. Use for price charts, backtests, historical analysis. Not for the current price. Requires Starter+ plan.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -336,7 +336,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinById",
-        description: "Get detailed information about a specific cryptocurrency",
+        description: "Get descriptive project information about a coin (description, links, team, tags). Does NOT include price; for price/market cap use getTickersById.",
         category: "coins",
         parameters: { coinId: { type: "string", required: true, format: "coin-id", example: "btc-bitcoin" } },
         returns: { type: "object", properties: ["id", "name", "symbol", "description", "links", "rank"] },
@@ -366,7 +366,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinMarkets",
-        description: "Get markets for a specific coin",
+        description: "Get the markets and exchanges where a coin trades, with per-market price and volume. Use for 'where can I buy X', 'where is X traded', 'X price on Binance'.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -378,7 +378,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTickersById",
-        description: "Get ticker data for a specific coin",
+        description: "Get the current price, market cap, 24h change and volume of a specific cryptocurrency in USD (or another quote currency). Use when asked 'what is the price of X', 'how much is Bitcoin worth', 'BTC to USD', 'ETH price now'. For past prices use getTickersHistoricalById.",
         category: "market",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -389,7 +389,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTickersHistoricalById",
-        description: "Get historical ticker data (requires Starter+ plan)",
+        description: "Get historical price and market-cap data for a coin at past dates. Use for 'price of BTC last week', backtests, charts over time. Not for the current price (use getTickersById). Requires Starter+ plan.",
         category: "market",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -487,7 +487,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTickerByContract",
-        description: "Get ticker by contract address",
+        description: "Get the current price and market data of a token by its contract address (for on-chain/DeFi tokens). Use when you have a 0x.../contract address rather than a name. For history use getHistoricalTickerByContract.",
         category: "contracts",
         parameters: {
           platformId: { type: "string", required: true },
@@ -498,7 +498,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getHistoricalTickerByContract",
-        description: "Get historical ticker by contract address (requires Starter+ plan)",
+        description: "Get historical price/market data of a token by its contract address. Not for the current price (use getTickerByContract). Requires Starter+ plan.",
         category: "contracts",
         parameters: {
           platformId: { type: "string", required: true },
@@ -514,7 +514,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "search",
-        description: "Search for currencies, exchanges, ICOs, people, and tags",
+        description: "Search CoinPaprika for coins, exchanges, ICOs, people and tags by name or symbol. Use FIRST when you only have a name/symbol and need the canonical id before calling a price tool.",
         category: "search",
         parameters: {
           q: { type: "string", required: true },
@@ -527,7 +527,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "resolveId",
-        description: "Resolve fuzzy query to canonical coin/exchange/people/tag IDs",
+        description: "Resolve a name or symbol ('bitcoin', 'BTC', 'AAVE') to its canonical CoinPaprika id ('btc-bitcoin', 'aave-new'). Call FIRST when you only have a symbol/name, since ids are not derivable from symbols, then pass the id to getTickersById.",
         category: "search",
         parameters: {
           type: { type: "string", required: true, enum: ["coin", "exchange", "people", "tags"] },
@@ -539,7 +539,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "priceConverter",
-        description: "Convert amount from base currency to quote currency",
+        description: "Convert an amount from one crypto or fiat to another at the current rate ('how much is 0.5 BTC in USD', 'convert 100 USDC to EUR'). For a plain coin price without an amount, use getTickersById.",
         category: "tools",
         parameters: {
           baseCurrencyId: { type: "string", required: true },
@@ -645,7 +645,7 @@ function buildCapabilitiesDocument() {
         steps: [
           "getPlatforms - List available contract platforms",
           "getContracts - List contracts on a platform",
-          "getTickerByContract - Get ticker by contract address",
+          "getTickerByContract - Get the current price and market data of a token by its contract address (for on-chain/DeFi tokens). Use when you have a 0x.../contract address rather than a name. For history use getHistoricalTickerByContract.",
         ],
         example_use_case: "Looking up an ERC-20 token by its Ethereum contract",
       },
