@@ -264,7 +264,7 @@ function buildCapabilitiesDocument() {
     tools: [
       {
         name: "status",
-        description: "Server status and configuration",
+        description: "Get the CoinPaprika MCP server's status and configuration (uptime, mode, enabled features). Use when asked 'is the server up', 'what mode am I in', 'server status'. This reports the MCP server itself, not the crypto market; for market health use getGlobal.",
         category: "system",
         parameters: {},
         returns: { type: "object" },
@@ -299,7 +299,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinOHLCVLatest",
-        description: "Get the latest full-day OHLC candle (open/high/low/close + volume) for a coin. For the live spot price use getTickersById.",
+        description: "Get the latest full-day OHLC candle (open/high/low/close plus volume) for a coin. For the live spot price use getTickersById.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id", example: "btc-bitcoin" },
@@ -321,7 +321,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinOHLCVHistorical",
-        description: "Get historical OHLC candles (open/high/low/close + volume) for a coin over a date range. Use for price charts, backtests, historical analysis. Not for the current price. Requires Starter+ plan.",
+        description: "Get OHLC candles (open/high/low/close plus volume) for a coin over a date range, for price charts, backtests and technical analysis. Use for 'daily chart for the last month', 'hourly candles since Jan 1'. For a single past date's spot value use getTickersHistoricalById; not for the current price. Requires Starter+ plan.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -344,7 +344,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinEvents",
-        description: "Get events for a specific coin",
+        description: "Get the timeline of events for a coin (launches, partnerships, hard forks, conference talks) with dates and descriptions. Use when asked 'what is happening with X', 'upcoming events for Ethereum', 'X roadmap events'. For prices or market data use getTickersById.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -355,7 +355,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinExchanges",
-        description: "Get exchanges where a coin is traded",
+        description: "List the exchanges that LIST a specific coin (venue names only). Use for 'which exchanges list X', 'is X on Coinbase', 'where is X listed'. For where to BUY with per-market price and volume use getCoinMarkets; for the coin's live price use getTickersById.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -366,7 +366,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getCoinMarkets",
-        description: "Get the markets and exchanges where a coin trades, with per-market price and volume. Use for 'where can I buy X', 'where is X traded', 'X price on Binance'.",
+        description: "Get the specific markets and trading pairs where a coin trades, with per-market price and 24h volume. Use for 'where can I buy X', 'X price on Binance', 'best market for X'. For just the list of exchange names use getCoinExchanges.",
         category: "coins",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -389,7 +389,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTickersHistoricalById",
-        description: "Get historical price and market-cap data for a coin at past dates. Use for 'price of BTC last week', backtests, charts over time. Not for the current price (use getTickersById). Requires Starter+ plan.",
+        description: "Get a coin's price and market cap at a single past date or time (a point-in-time value). Use for 'price of BTC last Tuesday', 'ETH market cap on 2024-01-01'. For OHLC chart candles over a range use getCoinOHLCVHistorical, not this. Not for the current price (use getTickersById). Requires Starter+ plan.",
         category: "market",
         parameters: {
           coinId: { type: "string", required: true, format: "coin-id" },
@@ -404,7 +404,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getPeopleById",
-        description: "Get information about a person in crypto space",
+        description: "Get profile information about a person in crypto (bio, roles, linked projects and accounts). Use when asked 'who is Vitalik Buterin', 'background on X founder', 'projects tied to this person'. Look up the person id first with search.",
         category: "people",
         parameters: { personId: { type: "string", required: true } },
         returns: { type: "object" },
@@ -412,7 +412,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTags",
-        description: "Get list of all tags",
+        description: "List all CoinPaprika tags (categories such as defi, stablecoin, memecoin, ai) used to group coins. Use when asked 'what categories exist', 'list crypto sectors', or to find a tag id before calling getTagById.",
         category: "tags",
         parameters: {
           additionalFields: { type: "string", required: false },
@@ -423,7 +423,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTagById",
-        description: "Get details about a specific tag",
+        description: "Get details for a specific tag: its description and the coins and ICOs grouped under it. Use when asked 'what coins are in the defi tag', 'show the stablecoin category', 'tokens tagged X'. Get the tag id first from getTags.",
         category: "tags",
         parameters: {
           tagId: { type: "string", required: true },
@@ -434,7 +434,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getExchanges",
-        description: "Get list of all exchanges",
+        description: "List all exchanges tracked by CoinPaprika with rank, trust score and volume. Use when asked 'top exchanges', 'biggest crypto exchanges', 'list exchanges by volume', or to find an exchange id before calling getExchangeByID.",
         category: "exchanges",
         parameters: {
           quotes: { type: "string", required: false },
@@ -445,7 +445,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getExchangeByID",
-        description: "Get details about a specific exchange",
+        description: "Get details for a specific exchange (volume, market count, trust score, links, fiat support). Use when asked 'tell me about Binance', 'Coinbase exchange stats', 'is X a trustworthy exchange'. For the pairs traded there use getExchangeMarkets; find the exchange id first with search or getExchanges.",
         category: "exchanges",
         parameters: {
           exchangeId: { type: "string", required: true },
@@ -456,7 +456,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getExchangeMarkets",
-        description: "Get markets on a specific exchange",
+        description: "List the trading pairs (markets) on a specific exchange with price and 24h volume per pair. Use when asked 'what pairs trade on Binance', 'markets on Kraken', 'BTC pairs on X exchange'. For exchange-level stats use getExchangeByID.",
         category: "exchanges",
         parameters: {
           exchangeId: { type: "string", required: true },
@@ -468,7 +468,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getPlatforms",
-        description: "Get list of contract platforms",
+        description: "List the smart-contract platforms (blockchains such as ethereum, bnb, polygon) for which CoinPaprika indexes token contracts. Use when asked 'which chains are supported for contract lookups', 'list contract platforms', or to pick a platform id before calling getContracts.",
         category: "contracts",
         parameters: { limit: { type: "integer", required: false, default: 50 } },
         returns: { type: "array", items: "Platform" },
@@ -476,7 +476,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getContracts",
-        description: "Get contracts for a specific platform",
+        description: "List the token contract addresses tracked on a specific platform, mapping each contract to its CoinPaprika coin id. Use when asked 'contracts on ethereum', 'what tokens does X chain have', or to map a contract address to a coin id. Get the platform id first from getPlatforms; for a single contract's price use getTickerByContract.",
         category: "contracts",
         parameters: {
           platformId: { type: "string", required: true },
@@ -487,7 +487,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getTickerByContract",
-        description: "Get the current price and market data of a token by its contract address (for on-chain/DeFi tokens). Use when you have a 0x.../contract address rather than a name. For history use getHistoricalTickerByContract.",
+        description: "Get the current price and market data of a token by its contract address (for on-chain and DeFi tokens). Use when you have a 0x... or contract address rather than a name. For history use getHistoricalTickerByContract.",
         category: "contracts",
         parameters: {
           platformId: { type: "string", required: true },
@@ -498,7 +498,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getHistoricalTickerByContract",
-        description: "Get historical price/market data of a token by its contract address. Not for the current price (use getTickerByContract). Requires Starter+ plan.",
+        description: "Get historical price and market data of a token by its contract address. Not for the current price (use getTickerByContract). Requires Starter+ plan.",
         category: "contracts",
         parameters: {
           platformId: { type: "string", required: true },
@@ -514,7 +514,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "search",
-        description: "Search CoinPaprika for coins, exchanges, ICOs, people and tags by name or symbol. Use FIRST when you only have a name/symbol and need the canonical id before calling a price tool.",
+        description: "Broadly search CoinPaprika across coins, exchanges, ICOs, people and tags by name or symbol when the entity type is unknown or you are exploring. Use for 'find anything called X'. If you specifically need a coin's canonical id to fetch its price, prefer resolveId.",
         category: "search",
         parameters: {
           q: { type: "string", required: true },
@@ -527,7 +527,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "resolveId",
-        description: "Resolve a name or symbol ('bitcoin', 'BTC', 'AAVE') to its canonical CoinPaprika id ('btc-bitcoin', 'aave-new'). Call FIRST when you only have a symbol/name, since ids are not derivable from symbols, then pass the id to getTickersById.",
+        description: "Resolve a coin name or symbol ('bitcoin', 'BTC', 'AAVE') to its single canonical CoinPaprika id ('btc-bitcoin', 'aave-new'). Call this FIRST whenever you have a bare symbol or name and want the coin's price, since ids are not derivable from symbols; then pass the id to getTickersById.",
         category: "search",
         parameters: {
           type: { type: "string", required: true, enum: ["coin", "exchange", "people", "tags"] },
@@ -551,7 +551,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "keyInfo",
-        description: "Verify API key (requires Pro plan)",
+        description: "Get details and usage for the current CoinPaprika API key (plan, quota, requests remaining, expiry). Use when asked 'what plan am I on', 'how many requests are left', 'is my API key valid'. Requires a Pro plan.",
         category: "system",
         parameters: {},
         returns: { type: "object" },
@@ -559,7 +559,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getMappings",
-        description: "Get API ID mappings (requires Business plan)",
+        description: "Get mappings between CoinPaprika ids and external or legacy identifiers so you can reconcile ids across systems. Use when asked 'map CoinPaprika ids to X', 'id crosswalk', 'external id mapping'. Requires a Business plan.",
         category: "system",
         parameters: {
           coinpaprika: { type: "string", required: false },
@@ -574,7 +574,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "getChangelogIDs",
-        description: "Get changelog IDs (requires Starter+ plan)",
+        description: "Get the ids of recent changes to CoinPaprika's coin and exchange listings (additions, renames, delistings) for syncing a local dataset. Use when asked 'what changed recently', 'new or delisted coins', 'listing changelog'. Requires a Starter+ plan.",
         category: "system",
         parameters: {
           page: { type: "integer", required: false, default: 1 },
