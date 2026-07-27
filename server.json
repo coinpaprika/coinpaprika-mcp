@@ -1,0 +1,15 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "name": "com.coinpaprika/coinpaprika",
+  "title": "CoinPaprika",
+  "description": "Real-time cryptocurrency market data: prices, tickers, exchanges, OHLCV candles, and market metadata.",
+  "repository": {
+    "url": "https://github.com/coinpaprika/coinpaprika-mcp",
+    "source": "github"
+  },
+  "version": "1.2.0",
+  "remotes": [
+    { "type": "streamable-http", "url": "https://mcp.coinpaprika.com/streamable-http" },
+    { "type": "sse", "url": "https://mcp.coinpaprika.com/sse" }
+  ]
+}
