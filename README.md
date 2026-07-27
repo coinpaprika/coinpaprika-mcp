@@ -25,7 +25,7 @@ CoinPaprika MCP connects Claude to live crypto market data for 8,000+ coins. No 
 - **Coin Analysis Tools**: Deep-dive into any cryptocurrency — price, team, events, exchanges, and markets
 - **Price Trackers**: Track prices across multiple quote currencies with historical OHLCV data
 - **Exchange Comparisons**: Compare trading pairs and volumes across 200+ exchanges
-- **Portfolio Valuations**: Convert between currencies and track price changes over time
+- **Portfolio Valuations**: Convert an amount between currencies ('0.5 BTC in USD') and track price changes over time
 - **Contract Lookup**: Find tokens by their smart contract address across multiple platforms
 
 ## Installation
@@ -122,27 +122,27 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 |------|-------------|
 | `getCapabilities` | Server capabilities, workflow patterns, validation rules, and best practices. **Start here.** |
 | `status` | Server status and configuration |
-| `getGlobal` | Global crypto market overview (market cap, volume, BTC dominance) |
+| `getGlobal` | Global market overview: total market cap, 24h volume, BTC dominance ('how is the market doing') |
 
 ### Coins
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getCoins` | List all coins (id, name, symbol, rank) | — |
-| `getCoinById` | Coin details (description, team, links) | `coinId` |
+| `getCoins` | List all coins (id, name, symbol, rank); no prices, use getTickers for prices | — |
+| `getCoinById` | Coin project details (description, team, links); no price, use getTickersById | `coinId` |
 | `getCoinEvents` | Upcoming events for a coin | `coinId` |
 | `getCoinExchanges` | Exchanges listing a coin | `coinId` |
-| `getCoinMarkets` | Markets/trading pairs for a coin | `coinId` |
+| `getCoinMarkets` | Markets/exchanges trading a coin ('where to buy X', 'X price on Binance') | `coinId` |
 
 ### Tickers & Prices
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getTickers` | All tickers with price quotes | — |
-| `getTickersById` | Ticker for a specific coin | `coinId` |
-| `getCoinOHLCVLatest` | OHLCV for the last full day | `coinId` |
-| `getCoinOHLCVToday` | OHLCV for today (in progress) | `coinId` |
-| `priceConverter` | Convert between currencies | `baseCurrencyId`, `quoteCurrencyId` |
+| `getTickers` | Current prices + market caps for top coins by market cap ('top 5 coins', market snapshot) | — |
+| `getTickersById` | Current price, market cap & 24h change of one coin ('BTC price', 'how much is ETH') | `coinId` |
+| `getCoinOHLCVLatest` | Latest full-day OHLC candle (not the live price) | `coinId` |
+| `getCoinOHLCVToday` | Today's in-progress OHLC candle | `coinId` |
+| `priceConverter` | Convert an amount between currencies ('0.5 BTC in USD') | `baseCurrencyId`, `quoteCurrencyId` |
 
 ### Exchanges
 
@@ -166,14 +166,14 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 |------|-------------|---------------------|
 | `getPlatforms` | List contract platforms | — |
 | `getContracts` | Contracts on a platform | `platformId` |
-| `getTickerByContract` | Ticker by contract address | `platformId`, `contractAddress` |
+| `getTickerByContract` | Token price by contract address (on-chain/DeFi tokens) | `platformId`, `contractAddress` |
 
 ### Search & Resolution
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `search` | Search coins, exchanges, ICOs, people, tags | `q` |
-| `resolveId` | Resolve fuzzy query to canonical CoinPaprika IDs | `type`, `query` |
+| `search` | Search coins/exchanges/people/tags by name; use FIRST to get an id | `q` |
+| `resolveId` | Resolve a name/symbol to canonical id; call FIRST before price tools | `type`, `query` |
 
 ### Paid-Tier Tools
 
