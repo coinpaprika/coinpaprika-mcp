@@ -2,6 +2,12 @@
 
 All notable changes to the CoinPaprika MCP Server will be documented in this file.
 
+## [1.3.1] - 2026-07-29
+
+### Changed
+
+- **Registered tool descriptions now carry the full intent-first text.** The 1.3.0 rewrite reached the `getCapabilities` manifest and the hosted worker, but the actual `server.tool()` registrations still shipped two-word stubs (`"Exchange details"`, `"Tag details"`), which is what MCP clients and catalogs read from `tools/list`. All 29 data-tool descriptions were rewritten to state the action and return value, give usage guidance and sibling alternatives, disclose that every tool is read-only and note plan requirements for paid-tier tools, and add parameter intent beyond the schema. No behavior, parameter, or output change.
+
 ## [1.3.0] - 2026-07-27
 
 ### Changed
