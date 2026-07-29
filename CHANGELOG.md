@@ -2,6 +2,12 @@
 
 All notable changes to the CoinPaprika MCP Server will be documented in this file.
 
+## [1.3.3] - 2026-07-29
+
+### Changed
+
+- Version bump only. No functional, parameter, or API changes since 1.3.2 (re-release under a fresh version).
+
 ## [1.3.2] - 2026-07-29
 
 ### Changed
