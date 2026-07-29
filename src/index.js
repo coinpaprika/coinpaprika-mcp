@@ -881,7 +881,7 @@ server.tool(
 // ─── Tool 7: getCoinOHLCVHistorical (paid: Starter+) ───
 server.tool(
   'getCoinOHLCVHistorical',
-  "Get OHLC candles (open, high, low, close and volume) for a coin over a date range, for price charts, backtests and technical analysis. Use for 'daily chart for the last month', 'hourly candles since Jan 1'. For a single past date's value use getTickersHistoricalById; not for the current price. Read-only; start and end accept YYYY-MM-DD, interval sets the candle size. Requires a Starter+ plan (COINPAPRIKA_API_KEY); without a valid key the call is rejected.",
+  "Get OHLC candles (open, high, low, close, volume) for a coin. Use for 'daily chart last month', 'hourly candles since Jan 1'. For one past price use getTickersHistoricalById; for the latest candle use getCoinOHLCVLatest. Read-only. Params: coinId (required) canonical id like 'btc-bitcoin' (resolve via resolveId); start (required) and end (optional, default now) accept 'yyyy-mm-dd' or ISO 8601; interval (optional, default '24h'): one of '5m', '15m', '30m', '1h', '6h', '12h', '24h'; quote (optional, default 'usd'); limit (optional, default 50, max 250) caps candles. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
   {
     coinId: z.string().describe(COIN_ID_DESCRIPTION),
     start: z.string().describe("Start date (ISO 8601 or yyyy-mm-dd)"),
@@ -1002,7 +1002,7 @@ server.tool(
 // ─── Tool 13: getTickersHistoricalById (paid: Starter+) ───
 server.tool(
   'getTickersHistoricalById',
-  "Get a coin's price and market cap at a single past date or time (a point-in-time value). Use for 'price of BTC last Tuesday', 'ETH market cap on 2024-01-01'. For OHLC chart candles over a range use getCoinOHLCVHistorical; not for the current price (use getTickersById). Read-only; start and end accept YYYY-MM-DD, interval sets the sampling step. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
+  "Get a coin's price, market cap and volume at past times as point-in-time snapshots (not OHLC candles). Use for 'price of BTC last Tuesday', 'ETH market cap on 2024-01-01'. For OHLC chart candles use getCoinOHLCVHistorical; for the current price use getTickersById. Read-only. Params: coinId (required) canonical id like 'btc-bitcoin' (resolve via resolveId); start (required) and end (optional, default now) accept 'yyyy-mm-dd' or ISO 8601; interval (optional, default '5m'); quote (optional, default 'usd'); limit (optional, default 50, max 250) caps points. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
   {
     coinId: z.string().describe(COIN_ID_DESCRIPTION),
     start: z.string().describe("Start date (ISO 8601 or yyyy-mm-dd)"),
@@ -1024,7 +1024,7 @@ server.tool(
 // ─── Tool 14: getPeopleById ───
 server.tool(
   'getPeopleById',
-  "Get profile information about a person in crypto: bio, roles, and linked projects and accounts. Use for 'who is Vitalik Buterin', 'background on X founder', 'projects tied to this person'. Look up the person id first with search. Read-only; personId is a canonical id from search. No API key required.",
+  "Get the profile of one person in crypto by id: name, description or bio, teams_count, positions held, and linked projects plus social and code accounts. Use for 'who is Vitalik Buterin', 'background on Charlie Lee', 'projects tied to this founder'. Find the personId first with search or resolveId using type 'people'; this tool needs the exact id, not a name. Read-only. Params: personId (required) is a canonical person id such as 'vitalik-buterin' or 'satoshi-nakamoto'; an unknown id returns not found. No API key required.",
   { personId: z.string().describe("Person ID (e.g., vitalik-buterin)") },
   async ({ personId }) => {
     try {
@@ -1039,7 +1039,7 @@ server.tool(
 // ─── Tool 15: getTags ───
 server.tool(
   'getTags',
-  "List all CoinPaprika tags (categories such as defi, stablecoin, memecoin, ai) used to group coins. Use for 'what categories exist', 'list crypto sectors', or to find a tag id before calling getTagById. Read-only; limit caps results. No API key required.",
+  "List all CoinPaprika tags (categories such as 'defi', 'stablecoin', 'memecoin', 'ai') used to group coins, returned as a list with each tag's id, name, coin_counter and ico_counter. Use for 'what crypto categories exist', 'list market sectors', or to find a tagId before calling getTagById. For the coins inside one tag use getTagById. Read-only. Params: additionalFields (optional, default none) is a comma-separated list of extra sections per tag, valid values 'coins' and 'icos' (example 'coins,icos'; omit for just summaries); limit (optional, default 50, max 250) caps how many tags return. No API key required.",
   {
     additionalFields: z.string().optional().describe("Comma-separated additional fields (e.g., coins,icos)"),
     limit: z.number().optional().default(50).describe("Number of tags to return (default: 50, max: 250)")
@@ -1061,7 +1061,7 @@ server.tool(
 // ─── Tool 16: getTagById ───
 server.tool(
   'getTagById',
-  "Get details for a specific tag: its description and the coins and ICOs grouped under it. Use for 'what coins are in the defi tag', 'show the stablecoin category', 'tokens tagged X'. Get the tag id first from getTags. Read-only; tagId is a tag id from getTags. No API key required.",
+  "Get details for one CoinPaprika tag (a category such as 'defi' or 'stablecoin'): its id, name, description, coin_counter, ico_counter, and optionally the coins and ICOs grouped under it. Use for 'what coins are in the defi tag', 'show the stablecoin category', 'tokens tagged ai'. To list every tag or find a tagId first use getTags. Read-only. Params: tagId (required) is a tag id from getTags such as 'defi'; additionalFields (optional, default none) is a comma-separated list of extra sections, valid values 'coins' and 'icos' (example 'coins,icos'). An unknown tagId returns an error. No API key required.",
   {
     tagId: z.string().describe("Tag ID (e.g., blockchain-service)"),
     additionalFields: z.string().optional().describe("Comma-separated additional fields (e.g., coins,icos)")
@@ -1080,7 +1080,7 @@ server.tool(
 // ─── Tool 17: getExchanges ───
 server.tool(
   'getExchanges',
-  "List all exchanges tracked by CoinPaprika with rank, trust score and 24h volume. Use for 'top exchanges', 'biggest crypto exchanges', 'list exchanges by volume', or to find an exchange id before calling getExchangeByID. Read-only; quotes sets the volume quote currency, limit caps results. No API key required.",
+  "List exchanges tracked by CoinPaprika as a list ranked by rank, each with id, name, trust score, active market count and 24h volume. Use for 'top exchanges by volume', 'biggest crypto exchanges', or to find an exchangeId before calling getExchangeByID. For one exchange's full stats use getExchangeByID; for its trading pairs use getExchangeMarkets. Read-only. Params: quotes (optional, default 'usd') is a comma-separated list of quote currencies for the volume figures, for example 'usd,btc'; limit (optional, default 50, max 250) caps how many exchanges return. No API key required.",
   {
     quotes: z.string().optional().describe("Comma-separated quote currencies"),
     limit: z.number().optional().default(50).describe("Number of exchanges to return (default: 50, max: 250)")
@@ -1121,7 +1121,7 @@ server.tool(
 // ─── Tool 19: getExchangeMarkets ───
 server.tool(
   'getExchangeMarkets',
-  "List the trading pairs (markets) on a specific exchange with price and 24h volume per pair. Use for 'what pairs trade on Binance', 'markets on Kraken', 'BTC pairs on X exchange'. For exchange-level stats use getExchangeByID. Read-only; exchangeId is an exchange id, limit caps results (max 250). No API key required.",
+  "List the trading pairs (markets) on one exchange as a list, each with the pair, base and quote coin ids, latest price, 24h volume and category. Use for 'what pairs trade on Binance', 'markets on Kraken', 'BTC pairs on Coinbase'. For exchange-level stats such as trust score use getExchangeByID; find the exchangeId first with getExchanges. Read-only. Params: exchangeId (required) is an exchange id such as 'binance'; quotes (optional, default 'usd') is a comma-separated list of quote currencies for the figures, e.g. 'usd,btc'; limit (optional, default 50, max 250) caps how many markets return. No API key required.",
   {
     exchangeId: z.string().describe("Exchange ID (e.g., binance)"),
     quotes: z.string().optional().describe("Comma-separated quote currencies"),
@@ -1162,7 +1162,7 @@ server.tool(
 // ─── Tool 21: getContracts ───
 server.tool(
   'getContracts',
-  "List the token contract addresses tracked on a specific platform, mapping each contract to its CoinPaprika coin id. Use for 'contracts on ethereum', 'what tokens does X chain have', or to map a contract address to a coin id. Get the platform id first from getPlatforms; for a single contract's price use getTickerByContract. Read-only; platformId is a platform id, limit caps results. No API key required.",
+  "List the token contract addresses tracked on one platform as a list, mapping each contract to its CoinPaprika coin id. Use for 'contracts on ethereum', 'what tokens does BSC have', or to map a contract address to a coin id. Find the platformId first with getPlatforms; for one contract's live price use getTickerByContract, and for its history use getHistoricalTickerByContract. Read-only. Params: platformId (required) is a platform id such as 'eth-ethereum' or 'bsc-binance-smart-chain'; limit (optional, default 50, max 250) caps how many contracts return. An unknown platformId returns an error. No API key required.",
   {
     platformId: z.string().describe("Platform ID (e.g., eth-ethereum)"),
     limit: z.number().optional().default(50).describe("Number of contracts to return (default: 50, max: 250)")
@@ -1201,7 +1201,7 @@ server.tool(
 // ─── Tool 23: getHistoricalTickerByContract (paid: Starter+) ───
 server.tool(
   'getHistoricalTickerByContract',
-  "Get historical price and market data of a token by its contract address. Use for 'this token's price on 2024-01-01 by address'. Not for the current price (use getTickerByContract). Read-only; platformId and contractAddress identify the token, start and end accept YYYY-MM-DD. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
+  "Get a token's price and market history by its contract address, as a time series. Use for 'token price on 2024-01-01 by address', 'hourly history for a contract'. For its current price use getTickerByContract; by coin id use getTickersHistoricalById. Read-only. Params: platformId (required) chain id like 'eth-ethereum'; contractAddress (required) token address; start (required) and end (optional, default now) accept 'yyyy-mm-dd' or ISO 8601; interval (optional, default '5m'); quote (optional, default 'usd'); limit (optional, default 50, max 250) caps points. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
   {
     platformId: z.string().describe("Platform ID (e.g., eth-ethereum)"),
     contractAddress: z.string().describe("Contract address"),
@@ -1248,7 +1248,7 @@ server.tool(
 // ─── Tool 25: resolveId ───
 server.tool(
   'resolveId',
-  "Resolve a coin name or symbol ('bitcoin', 'BTC', 'AAVE') to its single canonical CoinPaprika id ('btc-bitcoin', 'aave-new'). Call this FIRST whenever you have a bare symbol or name and want the coin's price, since ids are not derivable from symbols; then pass the id to getTickersById. Read-only; query is the name or symbol, type narrows the entity kind. No API key required.",
+  "Resolve a fuzzy coin, exchange, person or tag name or symbol to a ranked list of candidate CoinPaprika ids, best first (take the top one). Call FIRST when you have a bare name or symbol but need an id, since ids are not derivable, then pass the id to getTickersById for price. Returns candidates with id, name, symbol, type and rank; an empty list means no match. Read-only. Params: type (required; one of 'coin', 'exchange', 'people', 'tags') sets entity kind; query (required) is the fuzzy text; limit (optional, default 50, max 250) caps candidates. Answers 'id for AAVE', 'resolve Vitalik'. No API key required.",
   {
     type: z.enum(['coin', 'exchange', 'people', 'tags']).describe("Resource type to resolve"),
     query: z.string().describe("Fuzzy search query"),
@@ -1315,7 +1315,7 @@ server.tool(
 // ─── Tool 28: getMappings (paid: Business) ───
 server.tool(
   'getMappings',
-  "Get mappings between CoinPaprika ids and external or legacy identifiers (CoinMarketCap, CoinGecko, CryptoCompare, ISIN, DTI) so you can reconcile ids across systems. Use for 'map CoinPaprika ids to X', 'id crosswalk', 'external id mapping'. Read-only; each source parameter filters by that identifier. Requires a Business plan (COINPAPRIKA_API_KEY).",
+  "Cross-reference CoinPaprika ids with external or legacy identifiers. Returns crosswalk rows linking a CoinPaprika id to its external ids; only matching rows return and no match returns an empty list. Use for 'map CoinPaprika id to CoinGecko', 'which coin is this CoinMarketCap id', 'find id for an ISIN'. Read-only. All params are optional string filters; provide at least one, extra filters narrow further: coinpaprika (a CoinPaprika id), coinmarketcap, coingecko, cryptocompare (each that provider's id), isin (an ISIN code), dti (a Digital Token Identifier). Requires a Business plan (COINPAPRIKA_API_KEY).",
   {
     coinpaprika: z.string().optional().describe("CoinPaprika ID to look up"),
     coinmarketcap: z.string().optional().describe("CoinMarketCap ID to look up"),
@@ -1342,7 +1342,7 @@ server.tool(
 // ─── Tool 29: getChangelogIDs (paid: Starter+) ───
 server.tool(
   'getChangelogIDs',
-  "Get the ids of recent changes to CoinPaprika's coin and exchange listings (additions, renames, delistings) for syncing a local dataset. Use for 'what changed recently', 'new or delisted coins', 'listing changelog'. Read-only; page and limit paginate the results. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
+  "List ids of recent changes to CoinPaprika's coin and exchange listings (additions, renames, delistings) as a paginated feed, newest first, so you can sync or reconcile a local dataset. Returns change records, each with the affected id and change type; an empty page means no more changes. Use for 'what listings changed recently', 'new or delisted coins', 'listing changelog'. For the current full coin list use getCoins instead. Read-only. Params: page (optional, default 1) selects the page; limit (optional, default 50) sets records per page. Requires a Starter+ plan (COINPAPRIKA_API_KEY).",
   {
     page: z.number().optional().default(1).describe("Page number (default: 1)"),
     limit: z.number().optional().default(50).describe("Number of results per page (default: 50)")
