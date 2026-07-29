@@ -2,6 +2,12 @@
 
 All notable changes to the CoinPaprika MCP Server will be documented in this file.
 
+## [1.3.2] - 2026-07-29
+
+### Changed
+
+- **Sharpened 12 tool descriptions that were the lowest on tool-definition quality.** Each now enumerates every enum value (e.g. `resolveId` type: coin/exchange/people/tags), states each parameter's default and range, describes the returned shape and no-match behavior, and names the sibling tool to use instead. Fixed a description-vs-schema contradiction in `resolveId` (it claimed a single canonical id while exposing a `limit` of up to 250; it now correctly describes a ranked candidate list). No behavior, parameter, or output change.
+
 ## [1.3.1] - 2026-07-29
 
 ### Changed
