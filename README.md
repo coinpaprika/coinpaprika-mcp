@@ -1,5 +1,7 @@
 # CoinPaprika MCP Server
 
+[![smithery badge](https://smithery.ai/badge/coinpaprika/coinpaprika)](https://smithery.ai/servers/coinpaprika/coinpaprika)
+
 A Model Context Protocol (MCP) server that provides on-demand access to CoinPaprika's cryptocurrency market data API. Built specifically for AI assistants like Claude to programmatically fetch real-time prices, tickers, exchange data, OHLCV candles, and more with zero configuration.
 
 ## TL;DR
