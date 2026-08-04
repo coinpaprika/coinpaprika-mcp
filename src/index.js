@@ -41,7 +41,7 @@ const COIN_ID_REGEX = /^[a-z0-9]+-[a-z0-9-]+$/;
 const COIN_ID_DESCRIPTION =
   "Canonical CoinPaprika coin slug in 'symbol-name' format, e.g. 'btc-bitcoin', " +
   "'eth-ethereum', 'ada-cardano'. Do NOT pass ticker symbols ('BTC', 'AAVE') " +
-  "or guess the slug — it is not derivable from the symbol (e.g. AAVE resolves " +
+  "or guess the slug; it is not derivable from the symbol (e.g. AAVE resolves " +
   "to 'aave-new', which you could not guess). Call search or resolveId first to " +
   "resolve a symbol or name to its canonical id.";
 
@@ -93,18 +93,15 @@ function parseAPIError(status, statusText, endpoint) {
   }
 
   if (status === 429) {
-    const resetTime = new Date();
-    resetTime.setUTCHours(24, 0, 0, 0);
     return buildErrorResponse(
       ErrorCodes.CP429_RATE_LIMIT,
-      'Daily rate limit of 10,000 requests exceeded',
+      'Rate limit exceeded',
       true,
-      'Wait until rate limit resets or use cached data',
+      'Back off and retry. The free-tier quota is 20,000 calls per month, not a daily allowance, so a sustained 429 means the monthly allowance is spent. See https://coinpaprika.com/api/pricing/',
       undefined,
       {
-        limit: 10000,
-        reset_at: resetTime.toISOString(),
-        retry_after_seconds: Math.floor((resetTime.getTime() - Date.now()) / 1000)
+        free_tier_calls_per_month: 20000,
+        pricing_url: 'https://coinpaprika.com/api/pricing/'
       }
     );
   }
@@ -114,7 +111,7 @@ function parseAPIError(status, statusText, endpoint) {
       ErrorCodes.CP404_NOT_FOUND,
       'Resource not found',
       false,
-      'No resource with that id exists — it may be misspelled, retired, or for a different entity. Call search or resolveId to get the current canonical id, then retry.',
+      'No resource with that id exists. It may be misspelled, retired, or for a different entity. Call search or resolveId to get the current canonical id, then retry.',
       undefined,
       { endpoint }
     );
@@ -171,9 +168,13 @@ function validateCoinId(coinId) {
   return null;
 }
 
-// Rate limit tracking
+// Quota tracking. The CoinPaprika free tier is a MONTHLY allowance (20,000
+// calls), not a daily one. This counter only sees calls made by this process
+// since it started, so `remaining` is a local upper bound, not the account's
+// real balance. Use the keyInfo tool with a paid key for the authoritative
+// figure.
 let requestCount = 0;
-const RATE_LIMIT = 10000;
+const FREE_TIER_CALLS_PER_MONTH = 20000;
 
 // Build request headers (with optional API key)
 function buildHeaders() {
@@ -205,18 +206,14 @@ async function fetchFromAPI(endpoint) {
   requestCount++;
   const responseTime = Date.now() - startTime;
 
-  const resetTime = new Date();
-  resetTime.setUTCHours(24, 0, 0, 0);
-
   return {
     data,
     meta: {
-      rate_limit: {
-        limit: RATE_LIMIT,
-        remaining: RATE_LIMIT - requestCount,
-        used: requestCount,
-        percentage_used: Math.round((requestCount / RATE_LIMIT) * 10000) / 100,
-        reset_at: resetTime.toISOString()
+      quota: {
+        free_tier_calls_per_month: FREE_TIER_CALLS_PER_MONTH,
+        used_this_process: requestCount,
+        scope: 'this process since start, not the account balance',
+        pricing_url: 'https://coinpaprika.com/api/pricing/'
       },
       response_time_ms: responseTime,
       cached: false,
@@ -619,8 +616,8 @@ function buildCapabilitiesDocument() {
     },
 
     rate_limits: {
-      requests_per_day: 10000,
-      burst_limit: 100
+      free_tier_calls_per_month: 20000,
+      note: "Free tier allowance. Paid plans start at 400,000 calls per month; see https://coinpaprika.com/api/pricing/"
     },
 
     error_codes: {
@@ -628,9 +625,9 @@ function buildCapabilitiesDocument() {
       CP400_MISSING_REQUIRED: "Required parameter is missing",
       CP400_BAD_REQUEST: "Invalid request parameters",
       CP402_INSUFFICIENT_PLAN: "This endpoint requires a paid plan",
-      CP403_FORBIDDEN: "Access forbidden — check API key or plan",
+      CP403_FORBIDDEN: "Access forbidden. Check API key or plan",
       CP404_NOT_FOUND: "Resource not found. Use search to find correct IDs",
-      CP429_RATE_LIMIT: "Daily rate limit exceeded. Resets at midnight UTC",
+      CP429_RATE_LIMIT: "Rate limit exceeded. The free-tier quota is monthly, not daily",
       CP500_SERVER_ERROR: "Internal server error. Please try again later"
     },
 
@@ -718,7 +715,7 @@ function buildCapabilitiesDocument() {
       ],
       error_handling: [
         "Always validate coin ID format before API calls",
-        "Handle 402/403 errors gracefully — they indicate paid-plan requirements",
+        "Handle 402/403 errors gracefully; they indicate paid-plan requirements",
         "Retry with backoff for 429 rate limit errors",
         "Use resolveId to find correct IDs when 404 errors occur",
       ],
@@ -743,7 +740,7 @@ const server = new McpServer({
 // returning the structured CP400_INVALID_COIN_ID guidance (matches the hosted
 // MCP). Wrapping server.tool centralizes this for every id-bearing tool
 // (coinId / baseCurrencyId / quoteCurrencyId) instead of repeating it in each
-// handler — so a ticker symbol like "BTC" gets actionable guidance to call
+// handler, so a ticker symbol like "BTC" gets actionable guidance to call
 // search/resolveId instead of a bare upstream 404.
 const _registerTool = server.tool.bind(server);
 server.tool = (...regArgs) => {
@@ -780,7 +777,7 @@ server.tool(
       api_key_configured: !!API_KEY,
       mode: API_KEY ? 'authenticated' : 'free-tier',
       paid_features: API_KEY
-        ? 'API key configured — paid-tier endpoints available'
+        ? 'API key configured, paid-tier endpoints available'
         : 'No API key configured. For Pro/Business features, set COINPAPRIKA_API_KEY environment variable. Get a key at https://coinpaprika.com/api/pricing/',
     };
     return formatMcpResponse(statusData);
@@ -1326,7 +1323,7 @@ server.tool(
   },
   async (params) => {
     const qs = new URLSearchParams();
-    // Allowlist the upstream-recognized mapping params only — never forward
+    // Allowlist the upstream-recognized mapping params only, never forward
     // MCP-only or unexpected fields, which the upstream rejects with a 400.
     for (const k of ['coinpaprika', 'coinmarketcap', 'coingecko', 'cryptocompare', 'isin', 'dti']) {
       const v = params[k];
@@ -1377,9 +1374,9 @@ async function main() {
     await server.connect(transport);
     console.error(`CoinPaprika MCP server v${SERVER_VERSION} is running...`);
     if (API_KEY) {
-      console.error('API key configured — paid-tier endpoints available.');
+      console.error('API key configured, paid-tier endpoints available.');
     } else {
-      console.error('No API key configured — running in free-tier mode. Set COINPAPRIKA_API_KEY for paid features.');
+      console.error('No API key configured, running in free-tier mode. Set COINPAPRIKA_API_KEY for paid features.');
     }
   } catch (error) {
     console.error('Failed to start server:', error);

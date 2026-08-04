@@ -17,16 +17,16 @@ coinpaprika-mcp
 npx @coinpaprika/mcp@latest
 ```
 
-CoinPaprika MCP connects Claude to live crypto market data for 8,000+ coins. No API key required for free-tier features. [Installation](#installation) | [Configuration](#claude-desktop-integration) | [API Reference](https://api.coinpaprika.com)
+CoinPaprika MCP connects Claude to live crypto market data for 12,000+ cryptocurrencies. The free tier needs no API key. [Installation](#installation) | [Configuration](#claude-desktop-integration) | [API Reference](https://api.coinpaprika.com)
 
-> **Prefer zero setup?** Use the hosted MCP server at [mcp.coinpaprika.com](https://mcp.coinpaprika.com) — no installation, no API key, same 30 tools. See [Hosted Alternative](#hosted-alternative-no-installation) for transport endpoints.
+> **Prefer zero setup?** Use the hosted MCP server at [mcp.coinpaprika.com](https://mcp.coinpaprika.com): no installation, no API key to start, 31 tools (the 30 here plus `submitFeedback`). See [Hosted server](#hosted-server-no-installation) for transport endpoints.
 
 ## What Can You Build?
 
 - **Market Dashboards**: Real-time market overview with global stats, top coins, and volume trends
-- **Coin Analysis Tools**: Deep-dive into any cryptocurrency — price, team, events, exchanges, and markets
+- **Coin Analysis Tools**: Deep-dive into any cryptocurrency: price, team, events, exchanges, and markets
 - **Price Trackers**: Track prices across multiple quote currencies with historical OHLCV data
-- **Exchange Comparisons**: Compare trading pairs and volumes across 200+ exchanges
+- **Exchange Comparisons**: Compare trading pairs and volumes across 350+ exchanges
 - **Portfolio Valuations**: Convert an amount between currencies ('0.5 BTC in USD') and track price changes over time
 - **Contract Lookup**: Find tokens by their smart contract address across multiple platforms
 
@@ -34,10 +34,10 @@ CoinPaprika MCP connects Claude to live crypto market data for 8,000+ coins. No 
 
 ### Installing via Smithery
 
-To install CoinPaprika MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@coinpaprika/coinpaprika-mcp):
+To install CoinPaprika MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/servers/coinpaprika/coinpaprika):
 
 ```bash
-npx -y @smithery/cli install @coinpaprika/coinpaprika-mcp --client claude
+npx -y smithery mcp add coinpaprika/coinpaprika
 ```
 
 ### Manual Installation
@@ -93,7 +93,7 @@ claude mcp add coinpaprika -- npx @coinpaprika/mcp@latest
 COINPAPRIKA_API_KEY=your-key claude mcp add coinpaprika -- npx @coinpaprika/mcp@latest
 ```
 
-### Hosted Alternative (No Installation)
+### Hosted server (no installation)
 
 If you prefer zero setup, point any MCP-compatible client directly at the hosted server at [mcp.coinpaprika.com](https://mcp.coinpaprika.com). The landing page provides setup instructions and documentation. The following transport endpoints are available:
 
@@ -103,7 +103,7 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 | SSE | `https://mcp.coinpaprika.com/sse` | Legacy SSE transport |
 | JSON-RPC | `https://mcp.coinpaprika.com/json-rpc` | Direct JSON-RPC |
 
-> **Note**: These are MCP protocol endpoints — they won't display anything in a browser. Visit [mcp.coinpaprika.com](https://mcp.coinpaprika.com) for the landing page.
+> **Note**: These are MCP protocol endpoints. They won't display anything in a browser. Visit [mcp.coinpaprika.com](https://mcp.coinpaprika.com) for the landing page.
 
 ```json
 {
@@ -130,7 +130,7 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getCoins` | List all coins (id, name, symbol, rank); no prices, use getTickers for prices | — |
+| `getCoins` | List all coins (id, name, symbol, rank); no prices, use getTickers for prices | none |
 | `getCoinById` | Coin project details (description, team, links); no price, use getTickersById | `coinId` |
 | `getCoinEvents` | Upcoming events for a coin | `coinId` |
 | `getCoinExchanges` | Exchanges listing a coin | `coinId` |
@@ -140,7 +140,7 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getTickers` | Current prices + market caps for top coins by market cap ('top 5 coins', market snapshot) | — |
+| `getTickers` | Current prices + market caps for top coins by market cap ('top 5 coins', market snapshot) | none |
 | `getTickersById` | Current price, market cap & 24h change of one coin ('BTC price', 'how much is ETH') | `coinId` |
 | `getCoinOHLCVLatest` | Latest full-day OHLC candle (not the live price) | `coinId` |
 | `getCoinOHLCVToday` | Today's in-progress OHLC candle | `coinId` |
@@ -150,7 +150,7 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getExchanges` | List all exchanges | — |
+| `getExchanges` | List all exchanges | none |
 | `getExchangeByID` | Exchange details | `exchangeId` |
 | `getExchangeMarkets` | Markets on a specific exchange | `exchangeId` |
 
@@ -158,7 +158,7 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getTags` | List all tags/categories | — |
+| `getTags` | List all tags/categories | none |
 | `getTagById` | Tag details | `tagId` |
 | `getPeopleById` | Person/team member details | `personId` |
 
@@ -166,7 +166,7 @@ If you prefer zero setup, point any MCP-compatible client directly at the hosted
 
 | Tool | Description | Required Parameters |
 |------|-------------|---------------------|
-| `getPlatforms` | List contract platforms | — |
+| `getPlatforms` | List contract platforms | none |
 | `getContracts` | Contracts on a platform | `platformId` |
 | `getTickerByContract` | Token price by contract address (on-chain/DeFi tokens) | `platformId`, `contractAddress` |
 
@@ -243,21 +243,21 @@ const resolved = await resolveId({ type: "coin", query: "cardano" });
 ## Sample Prompts for Claude
 
 - "What's the current price of Bitcoin and Ethereum? Show me 24h change."
-- "Give me a comprehensive analysis of Cardano — price, team, events, and top exchanges."
+- "Give me a comprehensive analysis of Cardano: price, team, events, and top exchanges."
 - "Compare the top 5 crypto exchanges by trading volume."
 - "Convert 10 ETH to USD and show the current exchange rate."
 - "Find all coins tagged as 'defi' and show their market caps."
 - "What exchanges list Solana and what trading pairs are available?"
 - "Show me the OHLCV data for Bitcoin today."
 - "Search for all coins related to 'layer-2' and rank them by market cap."
-- "Look up the team behind Ethereum — who are the key people?"
+- "Look up the team behind Ethereum. Who are the key people?"
 - "Get the ticker for USDT by its Ethereum contract address."
 
 ## Rate Limits & Performance
 
-- **Free Tier Limits**: 10,000 requests per day
+- **Free Tier Limits**: 20,000 calls per month, no API key needed. Paid plans start at $99/month for 400,000 calls: https://coinpaprika.com/api/pricing/
 - **Response Time**: 100-500ms for most endpoints
-- **Data Coverage**: 8,000+ coins, 200+ exchanges
+- **Data Coverage**: 12,000+ cryptocurrencies, 350+ exchanges
 - **Error Handling**: Structured errors with codes, suggestions, and retry guidance
 - **Rate Limit Info**: Every response includes rate limit metadata
 
@@ -265,10 +265,10 @@ const resolved = await resolveId({ type: "coin", query: "cardano" });
 
 **Common Issues:**
 
-- **Rate limiting**: If receiving `CP429_RATE_LIMIT` errors, wait for daily reset at midnight UTC
+- **Rate limiting**: If receiving `CP429_RATE_LIMIT` errors, back off and retry. The free-tier quota is monthly, not daily, so a sustained 429 means the monthly allowance is spent
 - **Invalid coin ID**: Coin IDs use `symbol-name` format (e.g., `btc-bitcoin`, not `bitcoin` or `BTC`). Use `search` or `resolveId` to find correct IDs
 - **Paid-tier errors**: `CP402_INSUFFICIENT_PLAN` or `CP403_FORBIDDEN` mean the endpoint requires a paid plan. Set `COINPAPRIKA_API_KEY` environment variable
-- **Timeout errors**: Large data requests may take longer — reduce the `limit` parameter
+- **Timeout errors**: Large data requests may take longer, so reduce the `limit` parameter
 - **Network errors**: Check network connectivity, the service requires internet access
 
 ## Development
@@ -300,8 +300,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [CoinPaprika API Documentation](https://api.coinpaprika.com)
 - [API Pricing & Plans](https://coinpaprika.com/api/pricing/)
-- [Hosted MCP Server](https://mcp.coinpaprika.com) — Zero-setup alternative
-- [DexPaprika MCP](https://www.npmjs.com/package/dexpaprika-mcp) — DEX & DeFi data companion package
+- [Hosted MCP Server](https://mcp.coinpaprika.com), zero-setup option
+- [DexPaprika MCP](https://www.npmjs.com/package/dexpaprika-mcp), DEX and DeFi data companion package
 - [Model Context Protocol Specification](https://modelcontextprotocol.io)
-- [CoinPaprika](https://coinpaprika.com) — Comprehensive cryptocurrency market data
-- [DexPaprika](https://dexpaprika.com) — Onchain DEX analytics
+- [CoinPaprika](https://coinpaprika.com), comprehensive cryptocurrency market data
+- [DexPaprika](https://dexpaprika.com), onchain DEX analytics
