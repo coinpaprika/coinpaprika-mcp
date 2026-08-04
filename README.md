@@ -259,7 +259,7 @@ const resolved = await resolveId({ type: "coin", query: "cardano" });
 - **Response Time**: 100-500ms for most endpoints
 - **Data Coverage**: 12,000+ cryptocurrencies, 350+ exchanges
 - **Error Handling**: Structured errors with codes, suggestions, and retry guidance
-- **Rate Limit Info**: Every response includes rate limit metadata
+- **Quota Info**: Running this package yourself, every response carries a `meta.quota` block with the monthly free-tier allowance and the number of calls this server process has made since it started. That count is process-local, not your account balance. The hosted server at `mcp.coinpaprika.com` returns no `meta` block at all, so do not write client code that depends on one
 
 ## Troubleshooting
 
