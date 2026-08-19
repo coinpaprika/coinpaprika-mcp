@@ -298,7 +298,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Additional Resources
 
-- [CoinPaprika API Documentation](https://api.coinpaprika.com)
+- [CoinPaprika API Documentation](https://docs.coinpaprika.com)
 - [API Pricing & Plans](https://coinpaprika.com/api/pricing/)
 - [Hosted MCP Server](https://mcp.coinpaprika.com), zero-setup option
 - [DexPaprika MCP](https://www.npmjs.com/package/dexpaprika-mcp), DEX and DeFi data companion package
