@@ -4,6 +4,8 @@ All notable changes to the CoinPaprika MCP Server will be documented in this fil
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-08-19
+
 ### Fixed
 
 - **The free-tier quota was stated as "10,000 requests per day". It is 20,000 calls per month.** Verified against the live plan table at https://coinpaprika.com/api/pricing/. The wrong figure appeared in the 429 error message, in `getCapabilities.rate_limits`, in the `CP429_RATE_LIMIT` error-code text and in the README.
@@ -11,6 +13,13 @@ All notable changes to the CoinPaprika MCP Server will be documented in this fil
 - README coin and exchange counts: "8,000+ coins" and "200+ exchanges" are now "12,000+ cryptocurrencies" and "350+ exchanges".
 - README Smithery link and install command pointed at `@coinpaprika/coinpaprika-mcp`, which 404s. The live listing is `coinpaprika/coinpaprika`.
 - README said the hosted server has "same 30 tools". A live `tools/list` against `mcp.coinpaprika.com` returns 31: the 30 here plus `submitFeedback`.
+
+### Removed
+
+- **`meta.rate_limit`.** It reported `limit`, `remaining` and `percentage_used` against a
+  ceiling that does not exist, counting only this process's own calls. Read `meta.quota`
+  instead: it states the monthly free-tier allowance and says plainly that its count is
+  process-local rather than your real balance.
 
 ## [1.3.3] - 2026-07-29
 
