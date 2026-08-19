@@ -281,7 +281,7 @@ function buildCapabilitiesDocument() {
       name: "CoinPaprika MCP Server",
       version: SERVER_VERSION,
       description: "Real-time cryptocurrency prices, market caps, 24h changes and volumes for 12,000+ coins (Bitcoin, Ethereum, Solana, and more) and 350+ exchanges. Use for how much a crypto is worth, top coins by market cap, or live market data.",
-      documentation_url: "https://api.coinpaprika.com",
+      documentation_url: "https://docs.coinpaprika.com",
     },
     tools: [
       {
@@ -617,7 +617,9 @@ function buildCapabilitiesDocument() {
 
     rate_limits: {
       free_tier_calls_per_month: 20000,
-      note: "Free tier allowance. Paid plans start at 400,000 calls per month; see https://coinpaprika.com/api/pricing/"
+      note: "Free tier allowance. Paid plans start at 400,000 calls per month; see https://coinpaprika.com/api/pricing/",
+      documentation_url: "https://docs.coinpaprika.com",
+      pricing_url: "https://coinpaprika.com/api/pricing/"
     },
 
     error_codes: {
@@ -722,7 +724,7 @@ function buildCapabilitiesDocument() {
     },
 
     meta: {
-      documentation: "https://api.coinpaprika.com",
+      documentation: "https://docs.coinpaprika.com",
       pricing: "https://coinpaprika.com/api/pricing/",
       support: "https://github.com/coinpaprika/coinpaprika-mcp"
     }
