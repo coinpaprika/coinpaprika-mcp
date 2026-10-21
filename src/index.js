@@ -2,7 +2,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createRequire } from 'module';
 import fetch from 'node-fetch';
-import { assertPathUnchanged } from './safe-path.js';
+import { assertPathUnchanged, CONTRACT_ADDRESS, fetchUpstream, SLUG_ID, upstreamRoute } from './safe-path.js';
+import { pickKeyInfo } from './key-info.js';
 import { z } from 'zod';
 
 // Server version, read from package.json so the banner, capabilities
@@ -29,6 +30,7 @@ const ErrorCodes = {
   CP404_NOT_FOUND: "CP404_NOT_FOUND",
   CP429_RATE_LIMIT: "CP429_RATE_LIMIT",
   CP500_SERVER_ERROR: "CP500_SERVER_ERROR",
+  CP502_REDIRECT_REFUSED: "CP502_REDIRECT_REFUSED",
   CP_UNKNOWN_ERROR: "CP_UNKNOWN_ERROR",
 };
 
@@ -198,7 +200,23 @@ async function fetchFromAPI(endpoint) {
   const startTime = Date.now();
   const url = `${API_BASE_URL}${endpoint}`;
   assertPathUnchanged(url); // before the key leaves the process
-  const response = await fetch(url, { headers: buildHeaders() });
+  if (upstreamRoute(API_BASE_URL, url) === -1) throw new Error('Invalid identifier.');
+  let response;
+  try {
+    response = await fetchUpstream(fetch, API_BASE_URL, url, { headers: buildHeaders() });
+  } catch (e) {
+    if (e && e.status >= 300 && e.status <= 399) {
+      throw buildErrorResponse(
+        ErrorCodes.CP502_REDIRECT_REFUSED,
+        e.message,
+        false,
+        'Try again later. If it persists, report it at https://github.com/coinpaprika/coinpaprika-mcp/issues',
+        undefined,
+        { endpoint, status: e.status }
+      );
+    }
+    throw e;
+  }
 
   if (!response.ok) {
     const structuredError = parseAPIError(response.status, response.statusText, endpoint);
@@ -747,19 +765,50 @@ const server = new McpServer({
 // (coinId / baseCurrencyId / quoteCurrencyId) instead of repeating it in each
 // handler, so a ticker symbol like "BTC" gets actionable guidance to call
 // search/resolveId instead of a bare upstream 404.
+// The other ids that go into a request path are checked the same way: only the characters real
+// ids use, so a value that is not an id never becomes part of a URL.
+const OTHER_ID_FORMATS = {
+  exchangeId: SLUG_ID,
+  tagId: SLUG_ID,
+  personId: SLUG_ID,
+  platformId: SLUG_ID,
+  contractAddress: CONTRACT_ADDRESS,
+};
+
+function invalidIdError(field, value) {
+  const allowed = field === 'contractAddress'
+    ? 'letters, digits, ".", "_", "~", ":" and "-"'
+    : 'lowercase letters, digits and "-"';
+  return buildErrorResponse(
+    ErrorCodes.CP400_BAD_REQUEST,
+    `Invalid identifier: ${field} may contain only ${allowed}.`,
+    false,
+    'Pass the id exactly as CoinPaprika returns it, e.g. from search, getExchanges, getTags, getPlatforms or getContracts.',
+    undefined,
+    { field, length: value.length }
+  );
+}
+
 const _registerTool = server.tool.bind(server);
 server.tool = (...regArgs) => {
   const handler = regArgs[regArgs.length - 1];
   const schema = regArgs.length >= 4 && regArgs[2] && typeof regArgs[2] === 'object' ? regArgs[2] : null;
   if (typeof handler === 'function' && schema) {
     const idFields = ['coinId', 'baseCurrencyId', 'quoteCurrencyId'].filter((f) => f in schema);
-    if (idFields.length > 0) {
+    const otherIdFields = Object.keys(OTHER_ID_FORMATS).filter((f) => f in schema);
+    if (idFields.length > 0 || otherIdFields.length > 0) {
       regArgs[regArgs.length - 1] = async (args, ...rest) => {
         for (const f of idFields) {
           const v = args && args[f];
           if (typeof v === 'string') {
             const err = validateCoinId(v);
             if (err) return formatMcpError(err);
+          }
+        }
+        for (const f of otherIdFields) {
+          const v = args && args[f];
+          if (typeof v === 'string' && !OTHER_ID_FORMATS[f].test(v)) {
+            return formatMcpError(invalidIdError(f, v));
           }
         }
         return handler(args, ...rest);
@@ -1308,7 +1357,11 @@ server.tool(
       });
     }
     return withGuidance(
-      () => fetchFromAPI('/key/info'),
+      async () => {
+        // Only named, non-secret fields reach the model, whatever else the API sends.
+        const { data, meta } = await fetchFromAPI('/key/info');
+        return { data: pickKeyInfo(data, API_KEY), meta };
+      },
       'keyInfo requires a Pro plan API key.'
     );
   }

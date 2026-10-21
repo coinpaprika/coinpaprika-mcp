@@ -4,6 +4,14 @@ All notable changes to the CoinPaprika MCP Server will be documented in this fil
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-10-21
+
+### Security
+
+- **Ids are checked against the characters real ids use.** 1.4.1 refused a short list of bad characters, so an id such as `..;`, `.. ` or a Unicode look-alike of `.` or `/` still reached the API, and whether it then meant `..` depended on how each server in front of the API parsed it. `exchangeId`, `tagId`, `personId` and `platformId` must now match `[a-z0-9-]`, and `contractAddress` `[A-Za-z0-9._~:-]` and not only dots (EVM, Solana, Sui and Aptos type tags such as `0x2::sui::SUI`, dotted NEAR and Hedera ids, TON addresses). Every path segment is checked against the same alphabet, and only the routes the tools call are sent. Anything else is refused with "Invalid identifier" before a request is made.
+- **Redirects from the API are no longer followed blindly.** fetch followed them by default, repeating the request with your key without the path check seeing the new URL. A redirect is now followed only on the same host and base path, to the same route as the original request, and at most three times; anything else returns `CP502_REDIRECT_REFUSED`.
+- **`keyInfo` passes only named fields to the model.** It returned the whole `/key/info` answer. It now returns `plan`, `plan_status`, `plan_started_at` and the `usage` message and monthly `requests_made` / `requests_left` counters, and drops every other field, including `portal_url`, and any value that contains the key.
+
 ## [1.4.1] - 2026-10-21
 
 ### Security
