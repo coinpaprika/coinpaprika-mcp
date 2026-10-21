@@ -4,6 +4,12 @@ All notable changes to the CoinPaprika MCP Server will be documented in this fil
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-21
+
+### Security
+
+- **An id could change which API path a tool called.** Ids go into the request path through `encodeURIComponent`, which leaves `.` and `..` as they are, so an id of `..` moved the request, with your API key on it, to a different path. Every request now has its path checked before it is sent: a path that changes when parsed, or a segment that decodes to `.` or `..` or holds `/`, `\` or `%`, is refused with "Invalid identifier". No real coin, exchange, tag, person, platform or contract id is affected.
+
 ## [1.4.0] - 2026-08-19
 
 ### Fixed

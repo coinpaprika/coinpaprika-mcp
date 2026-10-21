@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { createRequire } from 'module';
 import fetch from 'node-fetch';
+import { assertPathUnchanged } from './safe-path.js';
 import { z } from 'zod';
 
 // Server version, read from package.json so the banner, capabilities
@@ -195,7 +196,9 @@ function clamp(n, min, max) {
 // Helper function to fetch data from CoinPaprika API with structured error handling
 async function fetchFromAPI(endpoint) {
   const startTime = Date.now();
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, { headers: buildHeaders() });
+  const url = `${API_BASE_URL}${endpoint}`;
+  assertPathUnchanged(url); // before the key leaves the process
+  const response = await fetch(url, { headers: buildHeaders() });
 
   if (!response.ok) {
     const structuredError = parseAPIError(response.status, response.statusText, endpoint);
