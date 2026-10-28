@@ -594,7 +594,7 @@ function buildCapabilitiesDocument() {
       },
       {
         name: "keyInfo",
-        description: "Get details and usage for the current CoinPaprika API key (plan, quota, requests remaining, expiry). Use when asked 'what plan am I on', 'how many requests are left', 'is my API key valid'. Requires a Pro plan.",
+        description: "Get details and usage for the current CoinPaprika API key (plan, quota, requests remaining, expiry). Use when asked 'what plan am I on', 'how many requests are left', 'is my API key valid'. Requires a paid plan (Starter or higher).",
         category: "system",
         parameters: {},
         returns: { type: "object" },
@@ -1344,10 +1344,10 @@ server.tool(
   }
 );
 
-// ─── Tool 27: keyInfo (paid: Pro) ───
+// ─── Tool 27: keyInfo (paid: Starter+) ───
 server.tool(
   'keyInfo',
-  "Get details and usage for the current CoinPaprika API key: plan, quota, requests remaining and expiry. Use for 'what plan am I on', 'how many requests are left', 'is my API key valid'. Read-only; takes no parameters. Requires a configured COINPAPRIKA_API_KEY (Pro plan); without a key the call is rejected.",
+  "Get details and usage for the current CoinPaprika API key: plan, quota, requests remaining and expiry. Use for 'what plan am I on', 'how many requests are left', 'is my API key valid'. Read-only; takes no parameters. Requires a configured COINPAPRIKA_API_KEY on a paid plan (Starter or higher); without a key the call is rejected.",
   {},
   async () => {
     if (!API_KEY) {
@@ -1362,7 +1362,7 @@ server.tool(
         const { data, meta } = await fetchFromAPI('/key/info');
         return { data: pickKeyInfo(data, API_KEY), meta };
       },
-      'keyInfo requires a Pro plan API key.'
+      'keyInfo requires an API key on a paid plan (Starter or higher).'
     );
   }
 );
