@@ -4,6 +4,10 @@ All notable changes to the CoinPaprika MCP Server will be documented in this fil
 
 ## [Unreleased]
 
+### Fixed
+
+- **`keyInfo` said it needed a Pro plan.** `/key/info` answers on every paid plan from Starter up, so the tool description, the error hint and the README now say Starter or higher.
+
 ## [1.4.2] - 2026-10-21
 
 ### Security

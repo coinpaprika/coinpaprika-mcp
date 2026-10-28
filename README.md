@@ -187,7 +187,7 @@ These tools require a paid CoinPaprika API plan. Without an API key, they return
 | `getTickersHistoricalById` | Starter+ | Historical ticker snapshots |
 | `getHistoricalTickerByContract` | Starter+ | Historical ticker by contract |
 | `getChangelogIDs` | Starter+ | Changelog of coin ID changes |
-| `keyInfo` | Pro | Verify API key details |
+| `keyInfo` | Starter+ | Verify API key details |
 | `getMappings` | Business | Cross-platform ID mappings |
 
 ## API Key Configuration
