@@ -3,11 +3,28 @@
   "name": "com.coinpaprika/coinpaprika",
   "title": "CoinPaprika",
   "description": "Real-time crypto market data: prices, tickers, exchanges, OHLCV candles, and metadata.",
+  "websiteUrl": "https://docs.coinpaprika.com/mcp-introduction",
+  "icons": [
+    {
+      "src": "https://coinpaprika.com/favicon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": [
+        "any"
+      ]
+    },
+    {
+      "src": "https://coinpaprika.com/apple-touch-icon.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "180x180"
+      ]
+    }
+  ],
   "repository": {
     "url": "https://github.com/coinpaprika/coinpaprika-mcp",
     "source": "github"
   },
-  "version": "1.7.0",
+  "version": "1.7.1",
   "remotes": [
     {
       "type": "streamable-http",
